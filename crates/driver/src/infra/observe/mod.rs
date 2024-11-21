@@ -39,7 +39,7 @@ pub fn init(log: &str) {
 
 /// Observe a received auction.
 pub fn auction(auction_id: i64) {
-    tracing::debug!(id=?auction_id, "received auction");
+    tracing::info!(id=?auction_id, "received auction");
 }
 
 /// Observe that liquidity fetching is about to start.
@@ -80,7 +80,7 @@ pub fn solutions(
     {
         tracing::info!(?solutions, "computed solutions");
     } else {
-        tracing::debug!("no solutions");
+        tracing::info!("no solutions");
     }
 }
 
@@ -96,7 +96,7 @@ pub fn empty_solution(solver: &solver::Name, id: &solution::Id) {
 // Observe that postprocessing (encoding & merging) of solutions is about to
 // start.
 pub fn postprocessing(solutions: &[Solution], deadline: chrono::DateTime<chrono::Utc>) {
-    tracing::debug!(
+    tracing::info!(
         solutions = ?solutions.len(),
         remaining = ?deadline.remaining(),
         "postprocessing solutions"
@@ -105,7 +105,7 @@ pub fn postprocessing(solutions: &[Solution], deadline: chrono::DateTime<chrono:
 
 // Observe that postprocessing didn't complete before the timeout.
 pub fn postprocessing_timed_out(completed: &[Settlement]) {
-    tracing::debug!(
+    tracing::warn!(
         completed = ?completed.len(),
         "postprocessing solutions timed out"
     );
@@ -113,12 +113,12 @@ pub fn postprocessing_timed_out(completed: &[Settlement]) {
 
 /// Observe that a solution is about to be encoded into a settlement.
 pub fn encoding(id: &solution::Id) {
-    tracing::trace!(?id, "encoding settlement");
+    tracing::info!(?id, "encoding settlement");
 }
 
 /// Observe that settlement encoding failed.
 pub fn encoding_failed(solver: &solver::Name, id: &solution::Id, err: &solution::Error) {
-    tracing::info!(?id, ?err, "discarded solution: settlement encoding");
+    tracing::warn!(?id, ?err, "discarded solution: settlement encoding");
     metrics::get()
         .dropped_solutions
         .with_label_values(&[solver.as_str(), "SettlementEncoding"])
@@ -137,7 +137,7 @@ pub fn not_merged(first: &Solution, other: &Solution, err: solution::error::Merg
 
 /// Observe that scoring is about to start.
 pub fn scoring(settlement: &Settlement) {
-    tracing::trace!(
+    tracing::info!(
         solution = ?settlement.solution(),
         gas = ?settlement.gas,
         "scoring settlement"
@@ -146,7 +146,7 @@ pub fn scoring(settlement: &Settlement) {
 
 /// Observe that scoring failed.
 pub fn scoring_failed(solver: &solver::Name, err: &solution::error::Scoring) {
-    tracing::info!(%solver, ?err, "discarded solution: scoring");
+    tracing::warn!(%solver, ?err, "discarded solution: scoring");
     metrics::get()
         .dropped_solutions
         .with_label_values(&[solver.as_str(), "Scoring"])
@@ -193,7 +193,7 @@ pub fn revealed(solver: &solver::Name, result: &Result<competition::Revealed, co
 
 /// Observe that the settlement process is about to start.
 pub fn settling() {
-    tracing::trace!("settling solution");
+    tracing::info!("settling solution");
 }
 
 /// Observe the result of the settlement process.
@@ -292,14 +292,14 @@ pub fn mounting_solver(solver: &solver::Name, path: &str) {
 
 /// Observe that a request is about to be sent to the solver.
 pub fn solver_request(endpoint: &Url, req: &str) {
-    tracing::trace!(%endpoint, %req, "sending request to solver");
+    tracing::info!(%endpoint, %req, "sending request to solver");
 }
 
 /// Observe that a response was received from the solver.
 pub fn solver_response(endpoint: &Url, res: Result<&str, &http::Error>) {
     match res {
         Ok(res) => {
-            tracing::trace!(%endpoint, %res, "received response from solver")
+            tracing::info!(%endpoint, %res, "received response from solver")
         }
         Err(err) => {
             tracing::warn!(%endpoint, ?err, "failed to receive response from solver")
@@ -373,7 +373,7 @@ fn competition_error(err: &competition::Error) -> &'static str {
 }
 
 pub fn deadline(deadline: &Deadline, timeouts: &Timeouts) {
-    tracing::debug!(?deadline, ?timeouts, "computed deadline");
+    tracing::info!(?deadline, ?timeouts, "computed deadline");
 }
 
 #[derive(Debug)]
