@@ -78,7 +78,8 @@ pub fn solutions(
         .iter()
         .any(|s| !s.is_empty(surplus_capturing_jit_order_owners))
     {
-        tracing::info!(?solutions, "computed solutions");
+        tracing::info!("computed solutions");
+        tracing::debug!(?solutions, "computed solutions");
     } else {
         tracing::info!("no solutions");
     }
@@ -138,6 +139,10 @@ pub fn not_merged(first: &Solution, other: &Solution, err: solution::error::Merg
 /// Observe that scoring is about to start.
 pub fn scoring(settlement: &Settlement) {
     tracing::info!(
+        gas = ?settlement.gas,
+        "scoring settlement"
+    );
+    tracing::debug!(
         solution = ?settlement.solution(),
         gas = ?settlement.gas,
         "scoring settlement"
@@ -156,6 +161,10 @@ pub fn scoring_failed(solver: &solver::Name, err: &solution::error::Scoring) {
 /// Observe the settlement score.
 pub fn score(settlement: &Settlement, score: &eth::Ether) {
     tracing::info!(
+        score = ?score,
+        "scored settlement"
+    );
+    tracing::debug!(
         solution = ?settlement.solution(),
         score = ?score,
         "scored settlement"
@@ -247,7 +256,7 @@ pub fn solved(solver: &solver::Name, result: &Result<Option<Solved>, competition
 pub fn quoted(solver: &solver::Name, order: &quote::Order, result: &Result<Quote, quote::Error>) {
     match result {
         Ok(quote) => {
-            tracing::info!(?order, ?quote, "quoted order");
+            tracing::debug!(?order, ?quote, "quoted order");
             metrics::get()
                 .quotes
                 .with_label_values(&[solver.as_str(), "Success"])
@@ -292,7 +301,8 @@ pub fn mounting_solver(solver: &solver::Name, path: &str) {
 
 /// Observe that a request is about to be sent to the solver.
 pub fn solver_request(endpoint: &Url, req: &str) {
-    tracing::info!(%endpoint, %req, "sending request to solver");
+    tracing::info!("sending request to solver");
+    tracing::debug!(%endpoint, %req, "sending request to solver");
 }
 
 /// Observe that a response was received from the solver.

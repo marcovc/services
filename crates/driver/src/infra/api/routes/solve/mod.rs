@@ -20,6 +20,7 @@ async fn route(
     auction: axum::Json<dto::Auction>,
 ) -> Result<axum::Json<dto::Solved>, (hyper::StatusCode, axum::Json<Error>)> {
     let auction_id = auction.id();
+    tracing::info!(auction_id, "8<-----------8<------- NEW SOLVE REQUEST -----8<-----------8<-----------");
     let handle_request = async {
         observe::auction(auction_id);
         let start = Instant::now();
