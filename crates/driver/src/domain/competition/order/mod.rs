@@ -188,6 +188,25 @@ impl Order {
             _ => num::BigRational::zero(),
         }
     }
+
+    /// The likelihood that this order will be fulfilled, based on token prices.
+    /// A larger value means that the order is more likely to be fulfilled.
+    /// This is used to prioritize orders when solving.
+    pub fn likelihood_surplus(&self, tokens: &auction::Tokens) -> num::BigRational {
+        match (
+            tokens.get(self.buy.token).price,
+            tokens.get(self.sell.token).price,
+        ) {
+            (Some(buy_price), Some(sell_price)) => {
+                let buy = buy_price.in_eth(self.buy.amount);
+                let sell = sell_price.in_eth(self.sell.amount);
+                sell.0
+                    .to_big_rational()
+                     - &buy.0.to_big_rational()
+            }
+            _ => num::BigRational::zero(),
+        }
+    }    
 }
 
 impl Available {

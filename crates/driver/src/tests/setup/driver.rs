@@ -247,14 +247,25 @@ async fn create_config_file(
 
     for strategy in &config.order_priority_strategies {
         match strategy {
-            OrderPriorityStrategy::ExternalPrice => write!(
+            OrderPriorityStrategy::ExternalPrice { min_fraction } => write!(
                 file,
                 r#"[[order-priority]]
                 strategy = "external-price"
+                min-fraction = {}
                 "#,
+                min_fraction,
             )
             .unwrap(),
-            OrderPriorityStrategy::CreationTimestamp { max_order_age } => {
+            OrderPriorityStrategy::ExternalSurplus { min_fraction } => write!(
+                file,
+                r#"[[order-priority]]
+                strategy = "external-surplus"
+                min-fraction = {}
+                "#,
+                min_fraction,
+            )
+            .unwrap(),
+            OrderPriorityStrategy::CreationTimestamp { min_fraction, max_order_age } => {
                 let max_order_age = max_order_age
                     .map(|age| format!("max-order-age = \"{:?}\"", age))
                     .unwrap_or_else(|| "".to_string());
@@ -262,13 +273,15 @@ async fn create_config_file(
                     file,
                     r#"[[order-priority]]
                     strategy = "creation-timestamp"
+                    min-fraction = {}
                     {}
                     "#,
+                    min_fraction,
                     max_order_age,
                 )
                 .unwrap()
             }
-            OrderPriorityStrategy::OwnQuotes { max_order_age } => {
+            OrderPriorityStrategy::OwnQuotes { min_fraction, max_order_age } => {
                 let max_order_age = max_order_age
                     .map(|age| format!("max-order-age = \"{:?}\"", age))
                     .unwrap_or_else(|| "".to_string());
@@ -276,8 +289,10 @@ async fn create_config_file(
                     file,
                     r#"[[order-priority]]
                     strategy = "own-quotes"
+                    min-fraction = {}
                     {}
                     "#,
+                    min_fraction,
                     max_order_age,
                 )
                 .unwrap()
