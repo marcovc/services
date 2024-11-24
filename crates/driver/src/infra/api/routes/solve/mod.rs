@@ -31,7 +31,7 @@ async fn route(
             .tap_err(|err| {
                 observe::invalid_dto(err, "auction");
             })?;
-        tracing::debug!(elapsed = ?start.elapsed(), "auction task execution time");
+        tracing::info!(elapsed = ?start.elapsed(), "auction task execution time");
         let competition = state.competition();
         let auction = state
             .pre_processor()
