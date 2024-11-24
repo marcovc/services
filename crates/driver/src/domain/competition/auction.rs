@@ -187,7 +187,8 @@ impl AuctionProcessor {
         let fut = tokio::task::spawn_blocking(move || {
             let start = std::time::Instant::now();
             orders.extend(rt.block_on(Self::cow_amm_orders(&eth, &tokens, &cow_amms, signature_validator.as_ref())));
-            sorting::sort_and_filter_orders(&mut orders, &tokens, &solver, &order_comparators, 100);
+            sorting::sort_orders(&mut orders, &tokens, &solver, &order_comparators);
+            //sorting::sort_and_filter_orders(&mut orders, &tokens, &solver, &order_comparators, 100);
             tracing::info!("fetching balances for {} orders", orders.len());
             let mut balances =
                 rt.block_on(async { Self::fetch_balances(&eth, &orders).await });
