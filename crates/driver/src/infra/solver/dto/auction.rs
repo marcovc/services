@@ -121,6 +121,7 @@ impl Auction {
                         uid: order.uid.into(),
                         sell_token: available.sell.token.into(),
                         buy_token: available.buy.token.into(),
+                        buy_token_is_native: solver_native_token.wrap_address && available.buy.token == weth.into(),
                         sell_amount: available.sell.amount.into(),
                         buy_amount: available.buy.amount.into(),
                         full_sell_amount: order.sell.amount.into(),
@@ -339,6 +340,7 @@ struct Order {
     uid: [u8; order::UID_LEN],
     sell_token: eth::H160,
     buy_token: eth::H160,
+    buy_token_is_native: bool,
     #[serde_as(as = "serialize::U256")]
     sell_amount: eth::U256,
     /// Original order `buy amount`
