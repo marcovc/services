@@ -82,6 +82,7 @@ impl Auction {
                 .map(|order| {
                     let mut available = order.available();
 
+                    let original_buy_token = available.buy.token;
                     if solver_native_token.wrap_address {
                         available.buy.token = available.buy.token.as_erc20(weth)
                     }
@@ -121,7 +122,7 @@ impl Auction {
                         uid: order.uid.into(),
                         sell_token: available.sell.token.into(),
                         buy_token: available.buy.token.into(),
-                        buy_token_is_native: solver_native_token.wrap_address && available.buy.token == weth.into(),
+                        buy_token_is_native: original_buy_token != available.buy.token,
                         sell_amount: available.sell.amount.into(),
                         buy_amount: available.buy.amount.into(),
                         full_sell_amount: order.sell.amount.into(),
