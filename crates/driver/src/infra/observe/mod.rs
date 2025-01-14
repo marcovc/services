@@ -263,7 +263,7 @@ pub fn quoted(solver: &solver::Name, order: &quote::Order, result: &Result<Quote
                 .inc();
         }
         Err(err) => {
-            tracing::warn!(?order, ?err, "failed to quote order");
+            tracing::info!(?order, ?err, "failed to quote order");
             metrics::get()
                 .quotes
                 .with_label_values(&[

@@ -32,6 +32,7 @@ async fn route(
                 state.tokens(),
             )
             .await;
+        tracing::info!(?quote, "quote result");
         observe::quoted(state.solver().name(), &order, &quote);
         Ok(axum::response::Json(dto::Quote::new(quote?)))
     };
