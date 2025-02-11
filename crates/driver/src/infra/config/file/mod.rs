@@ -639,11 +639,21 @@ pub enum OrderPriorityStrategy {
     /// This strategy uses the likelihood that an order will be fulfilled,
     /// based on token prices. A larger value means that the order is more
     /// likely to be fulfilled.
-    ExternalPrice,
+    #[serde(rename_all = "kebab-case")]
+    ExternalPrice {
+        min_fraction: f64,
+    },
+    /// Strategy to prioritize orders based on surplus assuming external price.
+    /// A larger value hopefully correlates with the order generating more surplus.
+    #[serde(rename_all = "kebab-case")]
+    ExternalSurplus {
+        min_fraction: f64,
+    },
     /// Strategy to prioritize orders based on their creation timestamp. The
     /// most recently created orders are given the highest priority.
     #[serde(rename_all = "kebab-case")]
     CreationTimestamp {
+        min_fraction: f64,
         /// When specified, only orders created within this threshold will be
         /// taken into account for this specific strategy.
         #[serde(with = "humantime_serde", default = "default_max_order_age")]
@@ -653,6 +663,7 @@ pub enum OrderPriorityStrategy {
     /// provided the winning quote for the order.
     #[serde(rename_all = "kebab-case")]
     OwnQuotes {
+        min_fraction: f64,
         /// When specified, only orders created within this threshold will be
         /// taken into account for this specific strategy.
         #[serde(with = "humantime_serde", default = "default_max_order_age")]
@@ -667,12 +678,19 @@ pub enum OrderPriorityStrategy {
 fn default_order_priority_strategies() -> Vec<OrderPriorityStrategy> {
     vec![
         OrderPriorityStrategy::OwnQuotes {
+            min_fraction: 0.0,
             max_order_age: default_max_order_age(),
         },
         OrderPriorityStrategy::CreationTimestamp {
+            min_fraction: 0.0,
             max_order_age: default_max_order_age(),
         },
-        OrderPriorityStrategy::ExternalPrice,
+        OrderPriorityStrategy::ExternalPrice {
+            min_fraction: 0.0,
+        },
+        OrderPriorityStrategy::ExternalSurplus {
+            min_fraction: 0.0,
+        },
     ]
 }
 

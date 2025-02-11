@@ -20,6 +20,7 @@ async fn route(
     req: axum::Json<dto::SolveRequest>,
 ) -> Result<axum::Json<dto::SolveResponse>, (hyper::StatusCode, axum::Json<Error>)> {
     let auction_id = req.id();
+    tracing::info!(auction_id, "8<-----------8<------- NEW SOLVE REQUEST -----8<-----------8<-----------");
     let handle_request = async {
         observe::auction(auction_id);
         let start = Instant::now();
@@ -30,7 +31,7 @@ async fn route(
             .tap_err(|err| {
                 observe::invalid_dto(err, "auction");
             })?;
-        tracing::debug!(elapsed = ?start.elapsed(), "auction task execution time");
+        tracing::info!(elapsed = ?start.elapsed(), "auction task execution time");
         let competition = state.competition();
         let auction = state
             .pre_processor()

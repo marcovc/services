@@ -240,6 +240,7 @@ impl Solver {
         let body = serde_json::to_string(&auction_dto).unwrap();
         let url = shared::url::join(&self.config.endpoint, "solve");
         super::observe::solver_request(&url, &body);
+        // measure the time it takes to send the request
         let mut req = self
             .client
             .post(url.clone())
@@ -248,7 +249,10 @@ impl Solver {
         if let Some(id) = observe::request_id::from_current_span() {
             req = req.header("X-REQUEST-ID", id);
         }
+        let start = std::time::Instant::now();
         let res = util::http::send(self.config.response_size_limit_max_bytes, req).await;
+        let elapsed = start.elapsed();
+        tracing::info!(?elapsed, "solver response time");
         super::observe::solver_response(&url, res.as_deref());
         let res = res?;
         let res: dto::Solutions = serde_json::from_str(&res)

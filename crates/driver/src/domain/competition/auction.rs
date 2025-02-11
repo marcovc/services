@@ -155,10 +155,13 @@ impl AuctionProcessor {
     /// unfillable orders. Fetches full app data for each order and returns an
     /// auction with updated orders.
     pub async fn prioritize(&self, auction: Auction, solver: &eth::H160) -> Auction {
-        Auction {
+        tracing::info!(?auction.id, "in prioritizing auction {:#?}", auction.deadline);
+        let r = Auction {
             orders: self.prioritize_orders(&auction, solver).await,
             ..auction
-        }
+        };
+        tracing::info!(?auction.id, "done prioritizing auction");
+        r
     }
 
     fn prioritize_orders(
@@ -206,6 +209,7 @@ impl AuctionProcessor {
                     .start_timer();
                 orders.extend(rt.block_on(Self::cow_amm_orders(&eth, &tokens, &cow_amms, signature_validator.as_ref())));
                 sorting::sort_orders(&mut orders, &tokens, &solver, &order_comparators);
+                //sorting::sort_and_filter_orders(&mut orders, &tokens, &solver, &order_comparators, 100);
             }
             let (mut balances, mut app_data_by_hash) =
                 rt.block_on(async {
@@ -541,15 +545,18 @@ impl AuctionProcessor {
 
         for strategy in order_priority_strategies {
             let comparator: Arc<dyn sorting::SortingStrategy> = match strategy {
-                OrderPriorityStrategy::ExternalPrice => Arc::new(sorting::ExternalPrice),
-                OrderPriorityStrategy::CreationTimestamp { max_order_age } => {
+                OrderPriorityStrategy::ExternalPrice { min_fraction } =>
+                    Arc::new(sorting::ExternalPrice { min_fraction }),
+                OrderPriorityStrategy::ExternalSurplus { min_fraction } => 
+                    Arc::new(sorting::ExternalSurplus { min_fraction }),
+                OrderPriorityStrategy::CreationTimestamp { min_fraction, max_order_age } => {
                     Arc::new(sorting::CreationTimestamp {
-                        max_order_age: max_order_age.map(|t| Duration::from_std(t).unwrap()),
+                        min_fraction, max_order_age: max_order_age.map(|t| Duration::from_std(t).unwrap()),
                     })
                 }
-                OrderPriorityStrategy::OwnQuotes { max_order_age } => {
+                OrderPriorityStrategy::OwnQuotes { min_fraction, max_order_age } => {
                     Arc::new(sorting::OwnQuotes {
-                        max_order_age: max_order_age.map(|t| Duration::from_std(t).unwrap()),
+                        min_fraction, max_order_age: max_order_age.map(|t| Duration::from_std(t).unwrap()),
                     })
                 }
             };

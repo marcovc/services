@@ -92,6 +92,7 @@ async fn creation_timestamp_sorting() {
         .solvers(vec![solver.clone()])
         .pool(ab_pool())
         .order_priority_strategy(OrderPriorityStrategy::CreationTimestamp {
+            min_fraction: 0.0,
             max_order_age: Some(Duration::from_secs(10)),
         })
         .order(
@@ -129,7 +130,7 @@ async fn external_price_sorting() {
     let test = setup()
         .solvers(vec![solver.clone()])
         .pool(ab_pool())
-        .order_priority_strategy(OrderPriorityStrategy::ExternalPrice)
+        .order_priority_strategy(OrderPriorityStrategy::ExternalPrice { min_fraction: 0.0 })
         .order(ab_order())
         .order(
             ab_order()
@@ -163,6 +164,7 @@ async fn own_quotes_sorting() {
         .solvers(vec![solver.clone()])
         .pool(ab_pool())
         .order_priority_strategy(OrderPriorityStrategy::OwnQuotes {
+            min_fraction: 0.0,
             max_order_age: Some(Duration::from_secs(10)),
         })
         .order(
@@ -197,11 +199,15 @@ async fn mixed_custom_sorting() {
     let test = setup()
         .solvers(vec![solver.clone()])
         .pool(ab_pool())
-        .order_priority_strategy(OrderPriorityStrategy::ExternalPrice)
+        .order_priority_strategy(OrderPriorityStrategy::ExternalPrice {
+            min_fraction: 0.0,
+        })
         .order_priority_strategy(OrderPriorityStrategy::CreationTimestamp {
+            min_fraction: 0.0,
             max_order_age: Some(Duration::from_secs(10)),
         })
         .order_priority_strategy(OrderPriorityStrategy::OwnQuotes {
+            min_fraction: 0.0,
             max_order_age: Some(Duration::from_secs(20)),
         })
         .order(ab_order())

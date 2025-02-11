@@ -27,6 +27,12 @@ impl SolveRequest {
             .collect();
         let token_infos = tokens.get(&token_addresses).await;
 
+        tracing::info!(
+            "deadline in the json: {:?} ({} seconds away)", 
+            self.deadline, 
+            self.deadline.signed_duration_since(chrono::Utc::now()).num_milliseconds() / bigdecimal::BigDecimal::new(1000.into(), 0)
+        );
+
         competition::Auction::new(
             Some(self.id.try_into()?),
             self.orders
